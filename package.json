@@ -1,0 +1,36 @@
+{
+  "name": "mesto-backend",
+  "version": "1.0.0",
+  "description": "REST API of Mesto project for Yandex.Praktikum",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "inspect": "node --inspect app.js"
+  },
+  "keywords": [],
+  "author": "Oleg Brekalo",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.0",
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "celebrate": "^13.0.4",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-winston": "^4.0.5",
+    "http-errors": "^1.8.0",
+    "joi": "^17.3.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.8",
+    "validator": "^13.5.2",
+    "winston": "^3.3.3"
+  }
+}
