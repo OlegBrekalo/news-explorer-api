@@ -1,4 +1,6 @@
 const express = require('express');
+require('dotenv').config();
+const helmet = require('helmet');
 const cors = require('cors');
 const createError = require('http-errors');
 const { errors } = require('celebrate');
@@ -9,14 +11,15 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
-const cardsRoutes = require('./routes/cards');
+const articleRoutes = require('./routes/article');
 
 const app = express();
+app.use(helmet());
 app.use(cors({ origin: true }));
 
-const { PORT = 3000 } = process.env;
+const { PORT = 4000, DB_NAME = 'newsArticleDB' } = process.env;
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect(`mongodb://localhost:27017/${DB_NAME}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -25,19 +28,13 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(requestLogger);
 
-// Self-destruct
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
-
 // Unprotected routers for Sign-up and Sign-in
 app.use('/', authRoutes);
 
 // Protected routers for other operations
 app.use('/users', auth, usersRoutes);
-app.use('/cards', auth, cardsRoutes);
+app.use('/article', auth, articleRoutes);
+
 app.use('*', () => {
   throw createError(404, 'Запрашиваемый ресурс не найден');
 });

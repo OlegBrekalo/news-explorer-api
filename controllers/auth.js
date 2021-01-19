@@ -6,12 +6,12 @@ const User = require('../models/user');
 
 // sign-up
 module.exports.createUser = (req, res, next) => {
-  const { email, password, name, about, avatar } = req.body;
+  const { email, password, name } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ email, password: hash, name, about, avatar }))
+    .then((hash) => User.create({ email, password: hash, name }))
     .then((user) => {
-      res.send({ data: user });
+      res.send({ _id: user._id, name: user.name, email: user.email });
     })
     .catch((err) => {
       if (err.message.startsWith('E11000 duplicate key')) {
@@ -39,7 +39,9 @@ module.exports.loginUser = (req, res, next) => {
         if (!match) {
           throw createError(401, 'Логин или пароль не верен');
         }
-        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        const { NODE_ENV, JWT_SECRET } = process.env;
+        const salt = NODE_ENV === 'production' ? JWT_SECRET : 'super-dev-key';
+        const token = jwt.sign({ _id: user._id }, salt, { expiresIn: '7d' });
         res.send({ token });
       });
     })
