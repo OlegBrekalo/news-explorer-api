@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    default: 'Пользователь по-умолчанию',
+    required: true,
     minlength: 2,
     maxlength: 30,
   },

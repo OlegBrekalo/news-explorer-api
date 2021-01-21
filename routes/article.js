@@ -1,4 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 const articleRouter = require('express').Router();
 const parserJSON = require('body-parser').json();
 
@@ -15,8 +16,25 @@ articleRouter.post(
       text: Joi.string().required(),
       date: Joi.date().required(),
       source: Joi.string().required(),
-      link: Joi.string().required().uri(),
-      image: Joi.string().required().uri(),
+      link: Joi.string()
+        .required()
+        .custom((value, helpers) => {
+          if (validator.isURL(value)) {
+            return value;
+          }
+          return helpers.message('Поле link должно быть ссылкой');
+        }),
+      image: Joi.string()
+        .required()
+        .custom((value, helpers) => {
+          if (
+            validator.isURL(value) &&
+            (value.endsWith('.jpg') || value.endsWith('.png') || value.endsWith('.gif'))
+          ) {
+            return value;
+          }
+          return helpers.message('Поле image должно быть ссылкой на изображение');
+        }),
     }),
   }),
   postArticle
@@ -27,7 +45,12 @@ articleRouter.delete(
   parserJSON,
   celebrate({
     params: Joi.object().keys({
-      id: Joi.string().alphanum().length(24),
+      id: Joi.string().custom((value, helpers) => {
+        if (validator.isMongoId(value)) {
+          return value;
+        }
+        return helpers.message('Некорректный ID статьи');
+      }),
     }),
   }),
   deleteArticleByID

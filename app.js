@@ -1,5 +1,6 @@
 const express = require('express');
-require('dotenv').config();
+
+const dotenv = require('dotenv');
 const helmet = require('helmet');
 const cors = require('cors');
 const createError = require('http-errors');
@@ -9,17 +10,22 @@ const mongoose = require('mongoose');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
+const limiter = require('./utils/rateLimiter');
+
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const articleRoutes = require('./routes/article');
 
+dotenv.config();
+
 const app = express();
+app.use(limiter);
 app.use(helmet());
 app.use(cors({ origin: true }));
 
-const { PORT = 4000, DB_NAME = 'newsArticleDB' } = process.env;
+const { PORT = 4000, DB_PATH = 'mongodb://localhost:27017/newsArticleDB' } = process.env;
 
-mongoose.connect(`mongodb://localhost:27017/${DB_NAME}`, {
+mongoose.connect(DB_PATH, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -34,15 +40,14 @@ app.use('/', authRoutes);
 // Protected routers for other operations
 app.use('/users', auth, usersRoutes);
 app.use('/article', auth, articleRoutes);
-
-app.use('*', () => {
+app.use('*', auth, () => {
   throw createError(404, 'Запрашиваемый ресурс не найден');
 });
 
 // error handlers
 app.use(errorLogger);
 app.use(errors()); // celebrate
-// eslint-disable-next-line no-unused-vars
+
 app.use((error, req, res, next) => {
   const { status = 500, message } = error;
   res.status(status);
@@ -51,9 +56,7 @@ app.use((error, req, res, next) => {
     status,
     message,
   });
+  next();
 });
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server start on PORT:${PORT}`);
-});
+app.listen(PORT, () => {});

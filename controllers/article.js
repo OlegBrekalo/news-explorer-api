@@ -19,7 +19,15 @@ module.exports.postArticle = (req, res, next) => {
   const owner = req.user._id;
   Article.create({ keyword, title, text, date, source, link, image, owner })
     .then((newArticle) => {
-      res.send(newArticle);
+      res.send({
+        keyword: newArticle.keyword,
+        title: newArticle.title,
+        text: newArticle.text,
+        date: newArticle.date,
+        source: newArticle.source,
+        link: newArticle.link,
+        image: newArticle.image,
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -40,7 +48,7 @@ module.exports.deleteArticleByID = (req, res, next) => {
         throw createError(404, 'Статья для удаления не найдена');
       }
       if (deletedArticle.owner._id.toString() !== req.user._id) {
-        throw createError(401, 'Нет прав для удаления статьи');
+        throw createError(403, 'Нет прав для удаления статьи');
       }
       return Article.findByIdAndDelete(articleID);
     })
